@@ -37,6 +37,15 @@ corn-system/public/data/
 **/*.pyc
 **/*.pyo
 RESUME_HIGHLIGHTS.md
+corn-system/README.md
+app-py/GNAH_INTEGRATION_ANALYSIS.md
+app-py/IMPLEMENTATION_SUMMARY.md
+app-py/INTEGRATION_IMPLEMENTATION.md
+app-py/INTEGRATION_PLAN.md
+app-py/MAIZE_YIELD_PARAMETER_ANALYSIS.md
+app-py/PARAMETER_STORAGE_COMPARISON.md
+app-py/SERVICE_STARTUP.md
+app-py/TESTING_GUIDE.md
 
 # Binary models, datasets, and generated files
 **/*.7z
