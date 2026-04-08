@@ -1,0 +1,58 @@
+# Private algorithm engines and model packages
+FSPM_Corn_Growth/
+GNAH_Maize_Yield/
+Maize_Yield_API/
+Maize_Yield_API1/
+
+# Backend private modules, sample inputs, and runtime outputs
+app-py/.env
+app-py/da_algorithms/
+app-py/data/
+app-py/inputfile/
+app-py/logs/
+app-py/models/MaizeSM/
+app-py/models/*.pyd
+app-py/output/
+app-py/temp/
+app-py/utils/data/models/
+app-py/utils/maize_yield/
+app-py/utils/output/
+app-py/utils/MaizeSM_*.py
+
+# Frontend private data and local repo state
+corn-system/.env
+corn-system/.env.local
+corn-system/.env.*.local
+corn-system/.git
+corn-system/.git-private-history/
+corn-system/dist/
+corn-system/node_modules/
+corn-system/public/data/
+!corn-system/.env.example
+
+# IDE and cache files
+**/.idea/
+**/.vscode/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+RESUME_HIGHLIGHTS.md
+
+# Binary models, datasets, and generated files
+**/*.7z
+**/*.cgf
+**/*.cpg
+**/*.dbf
+**/*.joblib
+**/*.npy
+**/*.obj
+**/*.pdf
+**/*.pnt
+**/*.prj
+**/*.sav
+**/*.shp
+**/*.shx
+**/*.tif
+**/*.tiff
+**/*.zip
+**/server.log

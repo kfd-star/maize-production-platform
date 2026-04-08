@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MaizeSM 数据同化服务平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #f8f9ff;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-header {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 2px solid #bbdefb;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header p {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .nav-menu {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            margin: 5px 0;
+        }
+
+        .nav-item:hover {
+            background: #e8f4fd;
+            border-left-color: #64b5f6;
+        }
+
+        .nav-item.active {
+            background: #bbdefb;
+            border-left-color: #1976d2;
+            color: #1565c0;
+            font-weight: bold;
+        }
+
+        .nav-item h3 {
+            font-size: 1.1em;
+            margin-bottom: 3px;
+        }
+
+        .nav-item p {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 30px;
+            background: #ffffff;
+            min-height: 100vh;
+        }
+
+        .content-header {
+            background: #fff3e0;
+            color: #e65100;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .content-header h2 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .content-header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .algorithm-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .algorithm-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .current-values {
+            background: #f3e5f5;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 2px solid #ce93d8;
+        }
+
+        .current-values h4 {
+            margin-top: 0;
+            color: #7b1fa2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .value-display {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 8px;
+            border: 1px solid #ce93d8;
+            font-size: 0.9em;
+            color: #7b1fa2;
+            font-weight: 500;
+        }
+
+        .file-upload-section {
+            background: #e8f5e8;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px dashed #81c784;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-section:hover {
+            border-color: #66bb6a;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .file-upload-section h4 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .file-upload-section p {
+            color: #2e7d32;
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #e84393 0%, #fd79a8 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .file-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            border: 1px solid #81c784;
+            color: #2e7d32;
+        }
+
+        .parameter-section {
+            background: #e3f2fd;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px solid #bbdefb;
+        }
+
+        .parameter-section h4 {
+            color: #1976d2;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #bbdefb;
+            font-size: 1.3em;
+        }
+
+        .parameter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .parameter-item {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #bbdefb;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .parameter-label {
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 1.1em;
+        }
+
+        .parameter-description {
+            color: #424242;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .parameter-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .parameter-input:focus {
+            outline: none;
+            border-color: #64b5f6;
+            box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.2);
+        }
+
+        .action-section {
+            text-align: center;
+            padding: 25px;
+            background: #e8f5e8;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            background: #66bb6a;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: #64b5f6;
+        }
+
+        /* 按钮状态样式 */
+        .btn.loading {
+            background: #ff9800;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .btn.success {
+            background: #4caf50;
+            cursor: default;
+        }
+
+        .btn.success::after {
+            content: '✓';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        /* 状态消息样式优化 */
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            z-index: 1000;
+            max-width: 400px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .status.success {
+            background: #4caf50;
+            color: white;
+            border-left: 5px solid #2e7d32;
+        }
+
+        .status.error {
+            background: #f44336;
+            color: white;
+            border-left: 5px solid #c62828;
+        }
+
+        .status.info {
+            background: #2196f3;
+            color: white;
+            border-left: 5px solid #1565c0;
+        }
+
+        .result-section {
+            background: #fff3e0;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 25px;
+            border: 2px solid #ffcc02;
+            display: none;
+        }
+
+        .result-section h4 {
+            color: #e65100;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ffcc02;
+            font-size: 1.3em;
+        }
+
+        .result-content {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ffcc02;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e65100;
+        }
+
+        /* 参数说明大窗口 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal {
+            width: min(900px, 92vw);
+            max-height: 80vh;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.25s ease;
+        }
+        .modal-header {
+            padding: 16px 20px;
+            background: #1976d2;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title { font-size: 18px; font-weight: bold; }
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+        }
+        .modal-body {
+            padding: 18px 20px;
+            overflow-y: auto;
+        }
+        .desc-section { margin-bottom: 18px; }
+        .desc-section h3 { margin: 0 0 8px; color: #1976d2; font-size: 16px; }
+        .desc-list { margin: 0; padding-left: 18px; color: #424242; line-height: 1.6; }
+
+        .quick-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            background: #ce93d8;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .quick-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7b1fa2;
+        }
+
+        .welcome-message h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #7b1fa2;
+        }
+
+        .welcome-message p {
+            font-size: 1.2em;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+            color: #7b1fa2;
+        }
+
+        .welcome-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .parameter-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>🌽 MaizeSM</h1>
+            <p>数据同化服务平台</p>
+        </div>
+        
+        <div class="nav-menu">
+            <div class="nav-item" data-algorithm="welcome">
+                <h3>🏠 欢迎</h3>
+                <p>开始使用平台</p>
+            </div>
+            
+            <div class="nav-item" data-algorithm="EnKF">
+                <h3>🔍 EnKF</h3>
+                <p>集合卡尔曼滤波</p>
+            </div>
+            
+            <div class="nav-item" data-algorithm="UKF">
+                <h3>🎯 UKF</h3>
+                <p>无迹卡尔曼滤波</p>
+            </div>
+            
+            <div class="nav-item" data-algorithm="PF">
+                <h3>🌊 PF</h3>
+                <p>粒子滤波</p>
+            </div>
+            
+            <div class="nav-item" data-algorithm="NLS4DVar">
+                <h3>⚡ NLS-4DVAR</h3>
+                <p>非线性最小二乘四维变分</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="status" id="status"></div>
+
+        <!-- 欢迎页面（唯一实例，包含全局配置与预览，见下方） -->
+
+        <!-- EnKF 算法内容 -->
+        <div class="algorithm-content" id="EnKF-content">
+            <div class="content-header">
+                <h2>🔍 EnKF (集合卡尔曼滤波)</h2>
+                <p>通过集合方法估计状态变量的后验分布，适用于非线性系统</p>
+            </div>
+            
+            <div class="current-values">
+                <h4>📊 当前参数值</h4>
+                <div id="enkf-current"></div>
+            </div>
+            
+            <div class="file-upload-section">
+                <h4>📁 上传观测数据</h4>
+                <p>支持 CSV 格式，包含 date 和 Lai 列</p>
+                <input type="file" id="enkf-file" class="file-input" accept=".csv">
+                <button class="upload-btn" onclick="document.getElementById('enkf-file').click()">
+                    选择文件
+                </button>
+                <div class="file-info" id="enkf-file-info" style="display: none;"></div>
+            </div>
+
+            <div class="parameter-section">
+                <h4>⚙️ 参数配置</h4>
+                <div class="parameter-grid">
+                    <div class="parameter-item">
+                        <label class="parameter-label">集合成员数量 (en_num)</label>
+                        <div class="parameter-description">控制模型集合的大小，数量越多结果越稳定但计算量越大</div>
+                        <input type="number" class="parameter-input" id="enkf-en_num" value="25" min="1" max="100">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">观测误差协方差 (err_lai_o)</label>
+                        <div class="parameter-description">反映观测数据的不确定性，值越大对观测的信任度越低</div>
+                        <input type="number" class="parameter-input" id="enkf-err_lai_o" value="0.01" step="0.01" min="0">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">模型误差协方差 (err_lai)</label>
+                        <div class="parameter-description">反映模型预测的不确定性，值越大对模型的信任度越低</div>
+                        <input type="number" class="parameter-input" id="enkf-err_lai" value="1.28" step="0.01" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button class="btn" onclick="updateEnKF()">更新参数</button>
+                <button class="btn btn-secondary" onclick="getEnKF()">获取当前参数</button>
+                <button class="btn" onclick="resetEnKFDefaults()">重置参数</button>
+                <button class="btn" onclick="executeEnKF()">🚀 执行算法</button>
+            </div>
+
+            <div class="result-section" id="enkf-result">
+                <h4>📊 执行结果</h4>
+                <div class="result-content" id="enkf-result-content"></div>
+            </div>
+        </div>
+
+        <!-- UKF 算法内容 -->
+        <div class="algorithm-content" id="UKF-content">
+            <div class="content-header">
+                <h2>🎯 UKF (无迹卡尔曼滤波)</h2>
+                <p>使用无迹变换处理非线性，避免雅可比矩阵计算</p>
+            </div>
+            
+            <div class="current-values">
+                <h4>📊 当前参数值</h4>
+                <div id="ukf-current"></div>
+            </div>
+            
+            <div class="file-upload-section">
+                <h4>📁 上传观测数据</h4>
+                <p>支持 CSV 格式，包含 date 和 Lai 列</p>
+                <input type="file" id="ukf-file" class="file-input" accept=".csv">
+                <button class="upload-btn" onclick="document.getElementById('ukf-file').click()">
+                    选择文件
+                </button>
+                <div class="file-info" id="ukf-file-info" style="display: none;"></div>
+            </div>
+
+            <div class="parameter-section">
+                <h4>⚙️ 参数配置</h4>
+                <div class="parameter-grid">
+                    <div class="parameter-item">
+                        <label class="parameter-label">集合成员数量 (en_num)</label>
+                        <div class="parameter-description">通常设为1，因为UKF是确定性算法</div>
+                        <input type="number" class="parameter-input" id="ukf-en_num" value="1" min="1" max="10">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">缩放参数 (alpha)</label>
+                        <div class="parameter-description">控制sigma点的分布范围，通常设为4</div>
+                        <input type="number" class="parameter-input" id="ukf-alpha" value="4.0" step="0.1" min="0">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">先验分布参数 (beta)</label>
+                        <div class="parameter-description">通常设为1，用于高斯先验</div>
+                        <input type="number" class="parameter-input" id="ukf-beta" value="1.0" step="0.1" min="0">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">缩放参数 (kappa)</label>
+                        <div class="parameter-description">通常设为0，用于调整sigma点分布</div>
+                        <input type="number" class="parameter-input" id="ukf-kappa" value="0.0" step="0.1">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">观测误差协方差 (err_lai_o)</label>
+                        <div class="parameter-description">控制观测数据的不确定性</div>
+                        <input type="number" class="parameter-input" id="ukf-err_lai_o" value="2.0" step="0.1" min="0">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">模型误差协方差 (err_lai)</label>
+                        <div class="parameter-description">控制模型预测的不确定性</div>
+                        <input type="number" class="parameter-input" id="ukf-err_lai" value="0.5" step="0.1" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button class="btn" onclick="updateUKF()">更新参数</button>
+                <button class="btn btn-secondary" onclick="getUKF()">获取当前参数</button>
+                <button class="btn" onclick="resetUKFDefaults()">重置参数</button>
+                <button class="btn" onclick="executeUKF()">🚀 执行算法</button>
+            </div>
+
+            <div class="result-section" id="ukf-result">
+                <h4>📊 执行结果</h4>
+                <div class="result-content" id="ukf-result-content"></div>
+            </div>
+        </div>
+
+        <!-- PF 算法内容 -->
+        <div class="algorithm-content" id="PF-content">
+            <div class="content-header">
+                <h2>🌊 PF (粒子滤波)</h2>
+                <p>基于粒子采样的非参数贝叶斯滤波方法</p>
+            </div>
+            
+            <div class="current-values">
+                <h4>📊 当前参数值</h4>
+                <div id="pf-current"></div>
+            </div>
+            
+            <div class="file-upload-section">
+                <h4>📁 上传观测数据</h4>
+                <p>支持 CSV 格式，包含 date 和 Lai 列</p>
+                <input type="file" id="pf-file" class="file-input" accept=".csv">
+                <button class="upload-btn" onclick="document.getElementById('pf-file').click()">
+                    选择文件
+                </button>
+                <div class="file-info" id="pf-file-info" style="display: none;"></div>
+            </div>
+
+            <div class="parameter-section">
+                <h4>⚙️ 参数配置</h4>
+                <div class="parameter-grid">
+                    <div class="parameter-item">
+                        <label class="parameter-label">粒子数量 (en_num)</label>
+                        <div class="parameter-description">粒子越多精度越高但计算量越大，建议40-100</div>
+                        <input type="number" class="parameter-input" id="pf-en_num" value="40" min="10" max="200">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">重采样阈值 (resample_threshold)</label>
+                        <div class="parameter-description">当有效粒子数低于此值时触发重采样，防止粒子退化</div>
+                        <input type="number" class="parameter-input" id="pf-resample_threshold" value="30" min="5" max="100">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">噪声标准差 (noise_std)</label>
+                        <div class="parameter-description">控制粒子的随机扰动，值越大探索能力越强但可能不稳定</div>
+                        <input type="number" class="parameter-input" id="pf-noise_std" value="0.15" step="0.01" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button class="btn" onclick="updatePF()">更新参数</button>
+                <button class="btn btn-secondary" onclick="getPF()">获取当前参数</button>
+                <button class="btn" onclick="resetPFDefaults()">重置参数</button>
+                <button class="btn" onclick="executePF()">🚀 执行算法</button>
+            </div>
+
+            <div class="result-section" id="pf-result">
+                <h4>📊 执行结果</h4>
+                <div class="result-content" id="pf-result-content"></div>
+            </div>
+        </div>
+
+        <!-- NLS-4DVAR 算法内容 -->
+        <div class="algorithm-content" id="NLS4DVar-content">
+            <div class="content-header">
+                <h2>⚡ NLS-4DVAR (非线性最小二乘四维变分)</h2>
+                <p>基于变分原理的优化方法，适用于强非线性系统</p>
+            </div>
+            
+            <div class="current-values">
+                <h4>📊 当前参数值</h4>
+                <div id="nls4dvar-current"></div>
+            </div>
+            
+            <div class="file-upload-section">
+                <h4>📁 上传观测数据</h4>
+                <p>支持 CSV 格式，包含 date 和 Lai 列</p>
+                <input type="file" id="nls4dvar-file" class="file-input" accept=".csv">
+                <button class="upload-btn" onclick="document.getElementById('nls4dvar-file').click()">
+                    选择文件
+                </button>
+                <div class="file-info" id="nls4dvar-file-info" style="display: none;"></div>
+            </div>
+
+            <div class="parameter-section">
+                <h4>⚙️ 参数配置</h4>
+                <div class="parameter-grid">
+                    <div class="parameter-item">
+                        <label class="parameter-label">背景段长度 (b_time_steps)</label>
+                        <div class="parameter-description">背景阶段的模拟天数，用于生成初始背景态</div>
+                        <input type="number" class="parameter-input" id="nls4dvar-b_time_steps" value="35" min="1" max="365">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">同化窗口长度 (time_steps)</label>
+                        <div class="parameter-description">单个同化窗口内的模拟天数</div>
+                        <input type="number" class="parameter-input" id="nls4dvar-time_steps" value="90" min="1" max="365">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">集合成员数量 (en_num)</label>
+                        <div class="parameter-description">用于POD与NLS的集合规模</div>
+                        <input type="number" class="parameter-input" id="nls4dvar-en_num" value="25" min="1" max="200">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">NLS迭代次数 (i_max)</label>
+                        <div class="parameter-description">非线性最小二乘的迭代次数</div>
+                        <input type="number" class="parameter-input" id="nls4dvar-i_max" value="13" min="1" max="1000">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">观测误差方差标量 (R_scalar)</label>
+                        <div class="parameter-description">构造观测误差协方差矩阵R = I * R_scalar</div>
+                        <input type="number" class="parameter-input" id="nls4dvar-R_scalar" value="0.01" step="0.0001" min="0">
+                    </div>
+                    <div class="parameter-item">
+                        <label class="parameter-label">同化窗口数量 (nass)</label>
+                        <div class="parameter-description">同化窗口循环次数</div>
+                        <input type="number" class="parameter-input" id="nls4dvar-nass" value="1" min="1" max="50">
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button class="btn" onclick="updateNLS4DVar()">更新参数</button>
+                <button class="btn btn-secondary" onclick="getNLS4DVar()">获取当前参数</button>
+                <button class="btn" onclick="resetNLS4DVarDefaults()">重置参数</button>
+                <button class="btn" onclick="executeNLS4DVar()">🚀 执行算法</button>
+            </div>
+
+            <div class="result-section" id="nls4dvar-result">
+                <h4>📊 执行结果</h4>
+                <div class="result-content" id="nls4dvar-result-content"></div>
+            </div>
+        </div>
+
+        <!-- 快速操作 -->
+        <div class="algorithm-content active" id="welcome-content">
+            <div class="welcome-message">
+                <span class="welcome-icon">🌽</span>
+                <h2>欢迎使用 MaizeSM 数据同化服务平台</h2>
+                <p>
+                    这是一个集成参数配置、文件上传、算法执行的一站式服务平台。
+                    从左侧选择您想要使用的算法，配置参数，上传观测数据，然后执行算法获得结果。
+                </p>
+                <p>
+                    支持 EnKF、UKF、PF、NLS-4DVAR 四种主流数据同化算法，
+                    每种算法都有详细的参数说明和调优建议。
+                </p>
+            </div>
+
+            <div class="parameter-section" id="config-section">
+            <h4>🧩 全局配置（config.ini）</h4>
+            <div class="current-values">
+                <h4>📊 当前配置</h4>
+                <div id="config-current"></div>
+            </div>
+            <div class="parameter-grid">
+                <div class="parameter-item">
+                    <label class="parameter-label">控制文件 (control_file)</label>
+                    <div class="parameter-description">从 inputfile 目录选择 .xls/.xlsx/.csv</div>
+                    <select class="parameter-input" id="config-control-file-select"></select>
+                    <div style="margin-top:10px">
+                        <button class="btn" onclick="selectControlFile()">设为当前控制文件</button>
+                        <button class="btn btn-secondary" onclick="fetchControlFiles()">刷新列表</button>
+                    </div>
+                </div>
+                <div class="parameter-item">
+                    <label class="parameter-label">蒸散模型 (ET_model)</label>
+                    <div class="parameter-description">当前仅支持 PT</div>
+                    <select class="parameter-input" id="config-et-model"></select>
+                </div>
+                <div class="parameter-item">
+                    <label class="parameter-label">并行核心数 (num_cores)</label>
+                    <div class="parameter-description">当前仅支持 submax</div>
+                    <select class="parameter-input" id="config-num-cores"></select>
+                </div>
+            </div>
+            <div class="action-section" style="margin-top:20px">
+                <button class="btn" onclick="updateConfig()">保存全局配置</button>
+                <button class="btn btn-secondary" onclick="getConfig()">获取当前配置</button>
+            </div>
+            
+            
+        </div>
+
+        <div class="quick-actions">
+            <button class="quick-btn" onclick="getAllParameters()">📋 获取所有参数</button>
+            <button class="quick-btn" onclick="getParameterDescriptions()">📖 查看参数说明</button>
+        </div>
+    </div>
+
+    <!-- 参数说明模态框 -->
+    <div id="desc-modal" class="modal-overlay" onclick="if(event.target===this) closeDescModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">参数详细说明</div>
+                <button class="modal-close" onclick="closeDescModal()">×</button>
+            </div>
+            <div id="desc-modal-body" class="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        //const API_BASE = 'http://127.0.0.1:8000/api';
+        const API_BASE = window.location.protocol + '//' + window.location.host + '/api';
+        let currentAlgorithm = 'welcome';
+        let OPTIONS = { ET_model: [], num_cores: [] };
+
+        // 导航菜单点击事件
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const algorithm = this.dataset.algorithm;
+                
+                // 更新导航状态
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 更新内容显示
+                document.querySelectorAll('.algorithm-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(`${algorithm}-content`).classList.add('active');
+                
+                currentAlgorithm = algorithm;
+            });
+        });
+
+        // 文件上传处理
+        document.querySelectorAll('.file-input').forEach(input => {
+            input.addEventListener('change', function() {
+                const file = this.files[0];
+                const algorithm = this.id.split('-')[0];
+                const fileInfo = document.getElementById(`${algorithm}-file-info`);
+                
+                if (file) {
+                    fileInfo.innerHTML = `
+                        <strong>📁 已选择文件:</strong> ${file.name}<br>
+                        <strong>📏 文件大小:</strong> ${(file.size / 1024).toFixed(2)} KB<br>
+                        <strong>📅 最后修改:</strong> ${new Date(file.lastModified).toLocaleString()}
+                    `;
+                    fileInfo.style.display = 'block';
+                } else {
+                    fileInfo.style.display = 'none';
+                }
+            });
+        });
+
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+
+        function updateCurrentValues(algorithm, data) {
+            const container = document.getElementById(`${algorithm}-current`);
+            container.innerHTML = '';
+            for (const [key, value] of Object.entries(data)) {
+                const span = document.createElement('span');
+                span.className = 'value-display';
+                span.textContent = `${key}: ${value}`;
+                container.appendChild(span);
+            }
+            // 同步到输入框，保持“当前参数值”和“参数配置”一致
+            try {
+                if (algorithm === 'enkf') {
+                    document.getElementById('enkf-en_num').value = data.en_num;
+                    document.getElementById('enkf-err_lai_o').value = data.err_lai_o;
+                    document.getElementById('enkf-err_lai').value = data.err_lai;
+                } else if (algorithm === 'ukf') {
+                    document.getElementById('ukf-en_num').value = data.en_num;
+                    document.getElementById('ukf-alpha').value = data.alpha;
+                    document.getElementById('ukf-beta').value = data.beta;
+                    document.getElementById('ukf-kappa').value = data.kappa;
+                    document.getElementById('ukf-err_lai_o').value = data.err_lai_o;
+                    document.getElementById('ukf-err_lai').value = data.err_lai;
+                } else if (algorithm === 'pf') {
+                    document.getElementById('pf-en_num').value = data.en_num;
+                    document.getElementById('pf-resample_threshold').value = data.resample_threshold;
+                    document.getElementById('pf-noise_std').value = data.noise_std;
+                } else if (algorithm === 'nls4dvar') {
+                    document.getElementById('nls4dvar-max_iterations').value = data.max_iterations;
+                    document.getElementById('nls4dvar-tolerance').value = data.tolerance;
+                    document.getElementById('nls4dvar-step_size').value = data.step_size;
+                }
+            } catch (e) {}
+        }
+
+        // 按钮状态管理函数
+        function setButtonLoading(button, text) {
+            button.classList.add('loading');
+            button.disabled = true;
+            button.dataset.originalText = button.textContent;
+            button.textContent = text;
+        }
+
+        function setButtonSuccess(button, text) {
+            button.classList.remove('loading');
+            button.classList.add('success');
+            button.textContent = text;
+            setTimeout(() => {
+                button.classList.remove('success');
+                button.disabled = false;
+                button.textContent = button.dataset.originalText;
+            }, 2000);
+        }
+
+        function setButtonError(button, text) {
+            button.classList.remove('loading');
+            button.disabled = false;
+            button.textContent = text;
+            setTimeout(() => {
+                button.textContent = button.dataset.originalText;
+            }, 2000);
+        }
+
+        // EnKF 相关函数
+        async function updateEnKF() {
+            const updateBtn = document.querySelector('#EnKF-content .btn');
+            const params = {
+                en_num: parseInt(document.getElementById('enkf-en_num').value),
+                err_lai_o: parseFloat(document.getElementById('enkf-err_lai_o').value),
+                err_lai: parseFloat(document.getElementById('enkf-err_lai').value)
+            };
+            
+            setButtonLoading(updateBtn, '更新中...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/parameters/EnKF`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
+                const result = await response.json();
+                updateCurrentValues('enkf', result);
+                setButtonSuccess(updateBtn, '✓ 更新成功');
+                showStatus('EnKF参数更新成功！', 'success');
+            } catch (error) {
+                setButtonError(updateBtn, '✗ 更新失败');
+                showStatus('EnKF参数更新失败：' + error.message, 'error');
+            }
+        }
+
+        async function getEnKF() {
+            try {
+                const response = await fetch(`${API_BASE}/parameters/EnKF`);
+                const result = await response.json();
+                updateCurrentValues('enkf', result);
+                showStatus('EnKF参数获取成功！', 'success');
+            } catch (error) {
+                showStatus('EnKF参数获取失败：' + error.message, 'error');
+            }
+        }
+
+        async function executeEnKF() {
+            const fileInput = document.getElementById('enkf-file');
+            if (!fileInput.files[0]) {
+                showStatus('请先选择观测数据文件！', 'error');
+                return;
+            }
+
+            const executeBtn = document.querySelector('#EnKF-content .btn:last-child');
+            const formData = new FormData();
+            formData.append('inputFile', fileInput.files[0]);
+
+            setButtonLoading(executeBtn, '🔄 执行中...');
+
+            try {
+                showStatus('🚀 EnKF算法执行中，请稍候...', 'info');
+                const response = await fetch(`${API_BASE}/EnKf`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                const resultSection = document.getElementById('enkf-result');
+                const resultContent = document.getElementById('enkf-result-content');
+                renderResult(JSON.stringify(result), resultContent);
+                resultSection.style.display = 'block';
+                
+                setButtonSuccess(executeBtn, '✓ 执行完成');
+                showStatus('EnKF算法执行完成！', 'success');
+            } catch (error) {
+                setButtonError(executeBtn, '✗ 执行失败');
+                showStatus('EnKF算法执行失败：' + error.message, 'error');
+            }
+        }
+
+        // UKF 相关函数
+        async function updateUKF() {
+            const updateBtn = document.querySelector('#UKF-content .btn');
+            const params = {
+                en_num: parseInt(document.getElementById('ukf-en_num').value),
+                alpha: parseFloat(document.getElementById('ukf-alpha').value),
+                beta: parseFloat(document.getElementById('ukf-beta').value),
+                kappa: parseFloat(document.getElementById('ukf-kappa').value),
+                err_lai_o: parseFloat(document.getElementById('ukf-err_lai_o').value),
+                err_lai: parseFloat(document.getElementById('ukf-err_lai').value)
+            };
+            
+            setButtonLoading(updateBtn, '更新中...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/parameters/UKF`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
+                const result = await response.json();
+                updateCurrentValues('ukf', result);
+                setButtonSuccess(updateBtn, '✓ 更新成功');
+                showStatus('UKF参数更新成功！', 'success');
+            } catch (error) {
+                setButtonError(updateBtn, '✗ 更新失败');
+                showStatus('UKF参数更新失败：' + error.message, 'error');
+            }
+        }
+
+        async function getUKF() {
+            try {
+                const response = await fetch(`${API_BASE}/parameters/UKF`);
+                const result = await response.json();
+                updateCurrentValues('ukf', result);
+                showStatus('UKF参数获取成功！', 'success');
+            } catch (error) {
+                showStatus('UKF参数获取失败：' + error.message, 'error');
+            }
+        }
+
+        async function executeUKF() {
+            const fileInput = document.getElementById('ukf-file');
+            if (!fileInput.files[0]) {
+                showStatus('请先选择观测数据文件！', 'error');
+                return;
+            }
+
+            const executeBtn = document.querySelector('#UKF-content .btn:last-child');
+            const formData = new FormData();
+            formData.append('inputFile', fileInput.files[0]);
+
+            setButtonLoading(executeBtn, '🔄 执行中...');
+
+            try {
+                showStatus('🚀 UKF算法执行中，请稍候...', 'info');
+                const response = await fetch(`${API_BASE}/UKF`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                const resultSection = document.getElementById('ukf-result');
+                const resultContent = document.getElementById('ukf-result-content');
+                renderResult(JSON.stringify(result), resultContent);
+                resultSection.style.display = 'block';
+                
+                setButtonSuccess(executeBtn, '✓ 执行完成');
+                showStatus('UKF算法执行完成！', 'success');
+            } catch (error) {
+                setButtonError(executeBtn, '✗ 执行失败');
+                showStatus('UKF算法执行失败：' + error.message, 'error');
+            }
+        }
+
+        // PF 相关函数
+        async function updatePF() {
+            const updateBtn = document.querySelector('#PF-content .btn');
+            const params = {
+                en_num: parseInt(document.getElementById('pf-en_num').value),
+                resample_threshold: parseInt(document.getElementById('pf-resample_threshold').value),
+                noise_std: parseFloat(document.getElementById('pf-noise_std').value)
+            };
+            
+            setButtonLoading(updateBtn, '更新中...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/parameters/PF`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
+                const result = await response.json();
+                updateCurrentValues('pf', result);
+                setButtonSuccess(updateBtn, '✓ 更新成功');
+                showStatus('PF参数更新成功！', 'success');
+            } catch (error) {
+                setButtonError(updateBtn, '✗ 更新失败');
+                showStatus('PF参数更新失败：' + error.message, 'error');
+            }
+        }
+
+        async function getPF() {
+            try {
+                const response = await fetch(`${API_BASE}/parameters/PF`);
+                const result = await response.json();
+                updateCurrentValues('pf', result);
+                showStatus('PF参数获取成功！', 'success');
+            } catch (error) {
+                showStatus('PF参数获取失败：' + error.message, 'error');
+            }
+        }
+
+        async function executePF() {
+            const fileInput = document.getElementById('pf-file');
+            if (!fileInput.files[0]) {
+                showStatus('请先选择观测数据文件！', 'error');
+                return;
+            }
+
+            const executeBtn = document.querySelector('#PF-content .btn:last-child');
+            const formData = new FormData();
+            formData.append('inputFile', fileInput.files[0]);
+
+            setButtonLoading(executeBtn, '🔄 执行中...');
+
+            try {
+                showStatus('🚀 PF算法执行中，请稍候...', 'info');
+                const response = await fetch(`${API_BASE}/PF`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                const resultSection = document.getElementById('pf-result');
+                const resultContent = document.getElementById('pf-result-content');
+                renderResult(JSON.stringify(result), resultContent);
+                resultSection.style.display = 'block';
+                
+                setButtonSuccess(executeBtn, '✓ 执行完成');
+                showStatus('PF算法执行完成！', 'success');
+            } catch (error) {
+                setButtonError(executeBtn, '✗ 执行失败');
+                showStatus('PF算法执行失败：' + error.message, 'error');
+            }
+        }
+
+        // NLS-4DVAR 相关函数
+        async function updateNLS4DVar() {
+            const updateBtn = document.querySelector('#NLS4DVar-content .btn');
+            const params = {
+                b_time_steps: parseInt(document.getElementById('nls4dvar-b_time_steps').value),
+                time_steps: parseInt(document.getElementById('nls4dvar-time_steps').value),
+                en_num: parseInt(document.getElementById('nls4dvar-en_num').value),
+                i_max: parseInt(document.getElementById('nls4dvar-i_max').value),
+                R_scalar: parseFloat(document.getElementById('nls4dvar-R_scalar').value),
+                nass: parseInt(document.getElementById('nls4dvar-nass').value)
+            };
+            
+            setButtonLoading(updateBtn, '更新中...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/parameters/NLS4DVar`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(params)
+                });
+                const result = await response.json();
+                updateCurrentValues('nls4dvar', result);
+                setButtonSuccess(updateBtn, '✓ 更新成功');
+                showStatus('NLS-4DVAR参数更新成功！', 'success');
+            } catch (error) {
+                setButtonError(updateBtn, '✗ 更新失败');
+                showStatus('NLS-4DVAR参数更新失败：' + error.message, 'error');
+            }
+        }
+
+        async function getNLS4DVar() {
+            try {
+                const response = await fetch(`${API_BASE}/parameters/NLS4DVar`);
+                const result = await response.json();
+                updateCurrentValues('nls4dvar', result);
+                // 同步表单
+                document.getElementById('nls4dvar-b_time_steps').value = result.b_time_steps;
+                document.getElementById('nls4dvar-time_steps').value = result.time_steps;
+                document.getElementById('nls4dvar-en_num').value = result.en_num;
+                document.getElementById('nls4dvar-i_max').value = result.i_max;
+                document.getElementById('nls4dvar-R_scalar').value = result.R_scalar;
+                document.getElementById('nls4dvar-nass').value = result.nass;
+                showStatus('NLS-4DVAR参数获取成功！', 'success');
+            } catch (error) {
+                showStatus('NLS-4DVAR参数获取失败：' + error.message, 'error');
+            }
+        }
+
+        async function executeNLS4DVar() {
+            const fileInput = document.getElementById('nls4dvar-file');
+            if (!fileInput.files[0]) {
+                showStatus('请先选择观测数据文件！', 'error');
+                return;
+            }
+
+            const executeBtn = document.querySelector('#NLS4DVar-content .btn:last-child');
+            const formData = new FormData();
+            formData.append('inputFile', fileInput.files[0]);
+
+            setButtonLoading(executeBtn, '🔄 执行中...');
+
+            try {
+                showStatus('🚀 NLS-4DVAR算法执行中，请稍候...', 'info');
+                const response = await fetch(`${API_BASE}/NLS4DVar`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
+                const resultSection = document.getElementById('nls4dvar-result');
+                const resultContent = document.getElementById('nls4dvar-result-content');
+                renderResult(JSON.stringify(result), resultContent);
+                resultSection.style.display = 'block';
+                
+                setButtonSuccess(executeBtn, '✓ 执行完成');
+                showStatus('NLS-4DVAR算法执行完成！', 'success');
+            } catch (error) {
+                setButtonError(executeBtn, '✗ 执行失败');
+                showStatus('NLS-4DVAR算法执行失败：' + error.message, 'error');
+            }
+        }
+
+        // 通用函数
+        async function getAllParameters() {
+            const btn = document.querySelector('.quick-btn');
+            const originalText = btn.textContent;
+            
+            setButtonLoading(btn, '获取中...');
+            
+            try {
+                await Promise.all([
+                    getEnKF(),
+                    getUKF(),
+                    getPF(),
+                    getNLS4DVar()
+                ]);
+                setButtonSuccess(btn, '✓ 获取成功');
+                showStatus('所有参数获取成功！', 'success');
+            } catch (error) {
+                setButtonError(btn, '✗ 获取失败');
+                showStatus('获取参数失败：' + error.message, 'error');
+            }
+        }
+
+        async function getParameterDescriptions() {
+            const btn = document.querySelectorAll('.quick-btn')[1];
+            const originalText = btn.textContent;
+            
+            setButtonLoading(btn, '获取中...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/parameters/description`);
+                const descriptions = await response.json();
+                // 构建更详细的大窗口内容
+                const overlay = document.getElementById('desc-modal');
+                const body = document.getElementById('desc-modal-body');
+                body.innerHTML = '';
+                for (const [algorithm, params] of Object.entries(descriptions)) {
+                    const section = document.createElement('div');
+                    section.className = 'desc-section';
+                    const h3 = document.createElement('h3');
+                    h3.textContent = algorithm;
+                    const ul = document.createElement('ul');
+                    ul.className = 'desc-list';
+                    for (const [param, desc] of Object.entries(params)) {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<strong>${param}</strong>: ${desc}`;
+                        ul.appendChild(li);
+                    }
+                    section.appendChild(h3);
+                    section.appendChild(ul);
+                    body.appendChild(section);
+                }
+                overlay.style.display = 'flex';
+                setButtonSuccess(btn, '✓ 获取成功');
+            } catch (error) {
+                setButtonError(btn, '✗ 获取失败');
+                showStatus('获取参数说明失败：' + error.message, 'error');
+            }
+        }
+
+        // 关闭参数说明模态框
+        function closeDescModal() {
+            const overlay = document.getElementById('desc-modal');
+            overlay.style.display = 'none';
+        }
+
+        // 各算法独立重置按钮
+        function resetEnKFDefaults() {
+            document.getElementById('enkf-en_num').value = '25';
+            document.getElementById('enkf-err_lai_o').value = '0.01';
+            document.getElementById('enkf-err_lai').value = '1.28';
+            showStatus('EnKF 参数已恢复默认值', 'info');
+        }
+
+        function resetUKFDefaults() {
+            document.getElementById('ukf-en_num').value = '1';
+            document.getElementById('ukf-alpha').value = '4.0';
+            document.getElementById('ukf-beta').value = '1.0';
+            document.getElementById('ukf-kappa').value = '0.0';
+            document.getElementById('ukf-err_lai_o').value = '2.0';
+            document.getElementById('ukf-err_lai').value = '0.5';
+            showStatus('UKF 参数已恢复默认值', 'info');
+        }
+
+        function resetPFDefaults() {
+            document.getElementById('pf-en_num').value = '40';
+            document.getElementById('pf-resample_threshold').value = '30';
+            document.getElementById('pf-noise_std').value = '0.15';
+            showStatus('PF 参数已恢复默认值', 'info');
+        }
+
+        function resetNLS4DVarDefaults() {
+            document.getElementById('nls4dvar-b_time_steps').value = '35';
+            document.getElementById('nls4dvar-time_steps').value = '90';
+            document.getElementById('nls4dvar-en_num').value = '25';
+            document.getElementById('nls4dvar-i_max').value = '13';
+            document.getElementById('nls4dvar-R_scalar').value = '0.01';
+            document.getElementById('nls4dvar-nass').value = '1';
+            showStatus('NLS-4DVAR 参数已恢复默认值', 'info');
+        }
+
+        // 美观渲染结果（高亮JSON并突出输出目录）
+        function renderResult(rawJson, container){
+            try{
+                const data = JSON.parse(rawJson);
+                const outDir = data._output_dir ? `<div style="margin-bottom:10px;padding:10px;border-radius:8px;background:#e8f5e9;border:1px solid #81c784;color:#1b5e20;font-weight:600;">📂 输出目录：${data._output_dir}</div>` : '';
+                const pretty = JSON.stringify(data, null, 2)
+                    .replace(/("_output_dir":\s*)"([^"]+)"/g, '$1"<strong>$2</strong>"');
+                container.innerHTML = outDir + `<pre style="margin:0;white-space:pre-wrap;word-break:break-word;">${pretty}</pre>`;
+            }catch(e){
+                container.textContent = rawJson;
+            }
+        }
+
+        // 页面加载时获取所有参数
+        window.addEventListener('load', async () => {
+            try {
+                await Promise.all([
+                    fetchOptions(),
+                    fetchControlFiles(),
+                    getConfig(),
+                    getAllParameters()
+                ]);
+            } catch (e) {}
+        });
+
+        async function fetchOptions(){
+            try{
+                const res = await fetch(`${API_BASE}/parameters/options`);
+                OPTIONS = await res.json();
+                const etSel = document.getElementById('config-et-model');
+                const coreSel = document.getElementById('config-num-cores');
+                etSel.innerHTML = '';
+                coreSel.innerHTML = '';
+                (OPTIONS.ET_model || []).forEach(v=>{
+                    const opt = document.createElement('option'); opt.value=v; opt.textContent=v; etSel.appendChild(opt);
+                });
+                (OPTIONS.num_cores || []).forEach(v=>{
+                    const opt = document.createElement('option'); opt.value=v; opt.textContent=v; coreSel.appendChild(opt);
+                });
+            }catch(e){ showStatus('获取可选项失败：'+e.message,'error'); }
+        }
+
+        async function fetchControlFiles(){
+            try{
+                const res = await fetch(`${API_BASE}/parameters/config/control-files`);
+                const data = await res.json();
+                const sel = document.getElementById('config-control-file-select');
+                sel.innerHTML = '';
+                (data.files||[]).forEach(f=>{
+                    const opt = document.createElement('option');
+                    opt.value = f.name; // 后端选择接口接收文件名
+                    opt.textContent = `${f.name} (${(f.size/1024).toFixed(1)} KB)`;
+                    sel.appendChild(opt);
+                });
+            }catch(e){ showStatus('获取控制文件列表失败：'+e.message,'error'); }
+        }
+
+        function renderConfigCurrent(cfg){
+            const cont = document.getElementById('config-current');
+            cont.innerHTML = '';
+            for (const [k,v] of Object.entries(cfg||{})){
+                const span = document.createElement('span');
+                span.className = 'value-display';
+                span.textContent = `${k}: ${v}`;
+                cont.appendChild(span);
+            }
+            // 同步下拉
+            try{
+                document.getElementById('config-et-model').value = cfg.ET_model;
+                document.getElementById('config-num-cores').value = cfg.num_cores;
+                const sel = document.getElementById('config-control-file-select');
+                const filename = (cfg.control_file||'').split('/').pop();
+                if ([...sel.options].some(o=>o.value===filename)) sel.value = filename;
+            }catch(e){}
+        }
+
+        async function getConfig(){
+            try{
+                const res = await fetch(`${API_BASE}/parameters/config`);
+                const cfg = await res.json();
+                renderConfigCurrent(cfg);
+            }catch(e){ showStatus('获取全局配置失败：'+e.message,'error'); }
+        }
+
+        async function updateConfig(){
+            const btns = document.querySelectorAll('#config-section .action-section .btn');
+            const saveBtn = btns[0];
+            setButtonLoading(saveBtn,'保存中...');
+            try{
+                const cfg = {
+                    control_file: `inputfile/${document.getElementById('config-control-file-select').value}`,
+                    ET_model: document.getElementById('config-et-model').value,
+                    num_cores: document.getElementById('config-num-cores').value
+                };
+                const res = await fetch(`${API_BASE}/parameters/config`,{
+                    method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(cfg)
+                });
+                const out = await res.json();
+                renderConfigCurrent(out);
+                setButtonSuccess(saveBtn,'✓ 已保存');
+                showStatus('全局配置已保存','success');
+            }catch(e){ setButtonError(saveBtn,'✗ 保存失败'); showStatus('保存全局配置失败：'+e.message,'error'); }
+        }
+
+        async function selectControlFile(){
+            const filename = document.getElementById('config-control-file-select').value;
+            if (!filename) { showStatus('请选择控制文件','error'); return; }
+            const btn = document.querySelector('#config-section .parameter-item .btn');
+            setButtonLoading(btn,'设置中...');
+            try{
+                const res = await fetch(`${API_BASE}/parameters/config/control-file?filename=${encodeURIComponent(filename)}`,{ method:'PUT' });
+                const out = await res.json();
+                renderConfigCurrent(out);
+                setButtonSuccess(btn,'✓ 已设置');
+                showStatus('控制文件已更新','success');
+            }catch(e){ setButtonError(btn,'✗ 设置失败'); showStatus('设置控制文件失败：'+e.message,'error'); }
+        }
+        
+    </script>
+</body>
+</html>

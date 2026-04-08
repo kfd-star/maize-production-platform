@@ -1,0 +1,76 @@
+@font-face {
+  font-family: 'PingFang SC';
+  src: url('/fonts/PingFangSC-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PingFang SC';
+  src: url('/fonts/PingFangSC-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+html,
+body {
+  padding: 0px;
+  margin: 0px;
+  height: 100%;
+  background-color: #054705;
+  /* 全局字体统一 */
+  font-family: 'PingFang SC';
+}
+
+/* 表格统一样式 */
+.el-table .el-table__header-wrapper thead th,
+.el-table .el-table__fixed-header-wrapper thead th {
+  padding: 0;
+  background-color: #f9f9f9;
+  height: 50px;
+  line-height: 40px;
+  color: #283543;
+}
+
+:root {
+  /* 注入苹方 WebFont，匹配 Regular/Medium 字重；加 !important 防止被 Element Plus 默认值覆盖 */
+  --el-font-family: 'PingFang SC' !important;
+}
+
+/* 兜底让常用 Element 组件也直接指定苹方 */
+.el-button,
+.el-input__inner,
+.el-textarea__inner,
+.el-select,
+.el-upload,
+.el-dialog,
+.el-form,
+.el-table,
+.el-pagination,
+.el-tabs__item,
+.el-breadcrumb__inner,
+.el-menu,
+.el-sub-menu__title,
+.el-dropdown-menu__item {
+  font-family: 'PingFang SC' !important;
+}
+
+/* 折叠状态下弹出菜单（popper）中的菜单项悬浮效果 */
+.el-menu--popup .el-menu-item:not(.is-active):hover,
+.el-menu--popup .el-sub-menu:not(.is-active) > .el-sub-menu__title:hover,
+.el-popper .el-menu--popup .el-menu-item:not(.is-active):hover,
+.el-popper .el-menu--popup .el-sub-menu:not(.is-active) > .el-sub-menu__title:hover {
+  color: #0aa979 !important;
+}
+.el-menu--popup .el-menu-item:not(.is-active):hover .el-icon,
+.el-menu--popup .el-menu-item:not(.is-active):hover span,
+.el-menu--popup .el-sub-menu:not(.is-active) > .el-sub-menu__title:hover .el-icon,
+.el-menu--popup .el-sub-menu:not(.is-active) > .el-sub-menu__title:hover span,
+.el-popper .el-menu--popup .el-menu-item:not(.is-active):hover .el-icon,
+.el-popper .el-menu--popup .el-menu-item:not(.is-active):hover span,
+.el-popper .el-menu--popup .el-sub-menu:not(.is-active) > .el-sub-menu__title:hover .el-icon,
+.el-popper .el-menu--popup .el-sub-menu:not(.is-active) > .el-sub-menu__title:hover span {
+  color: #0aa979 !important;
+}
